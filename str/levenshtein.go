@@ -16,44 +16,42 @@ type LevOptions struct {
 
 var defaultLevOpts = &LevOptions{true, 1, 1, 1}
 
-func LevDistance(s, t string, opts *LevOptions) int {
-	if s == t {
+func LevDistance(first, second string, opts *LevOptions) int {
+	if first == second {
 		return 0
 	}
 
-	sLen := utf8.RuneCountInString(s)
-	tLen := utf8.RuneCountInString(t)
-	if math.Min(sLen, tLen) == 0 {
-		return math.Max(sLen, tLen)
+	fLen := utf8.RuneCountInString(first)
+	sLen := utf8.RuneCountInString(second)
+	if math.Min(fLen, sLen) == 0 {
+		return math.Max(fLen, sLen)
+	}
+	if fLen > sLen {
+		first, second = second, first
+		fLen, sLen = sLen, fLen
 	}
 
 	if opts == nil {
 		opts = defaultLevOpts
 	}
-
 	if !opts.CaseSensitive {
-		s = strings.ToLower(s)
-		t = strings.ToLower(t)
+		first = strings.ToLower(first)
+		second = strings.ToLower(second)
 	}
 
-	if sLen > tLen {
-		s, t = t, s
-		sLen, tLen = tLen, sLen
-	}
-
-	prevCol := make([]int, tLen+1)
+	prevCol := make([]int, sLen+1)
 	for i := 0; i < len(prevCol); i++ {
 		prevCol[i] = i
 	}
 
-	col := make([]int, tLen+1)
-	for i := 0; i < sLen; i++ {
+	col := make([]int, sLen+1)
+	for i := 0; i < fLen; i++ {
 		col[0] = i + 1
-		for j := 0; j < tLen; j++ {
+		for j := 0; j < sLen; j++ {
 			delCost := prevCol[j+1] + opts.DelCost
 			insCost := col[j] + opts.InsCost
 			subCost := prevCol[j]
-			if s[i] != t[j] {
+			if first[i] != second[j] {
 				subCost += opts.SubCost
 			}
 
@@ -63,10 +61,10 @@ func LevDistance(s, t string, opts *LevOptions) int {
 		col, prevCol = prevCol, col
 	}
 
-	return prevCol[tLen]
+	return prevCol[sLen]
 }
 
-func LevRatio(s, t string, opts *LevOptions) float64 {
-	maxLen := float64(math.Max(len(s), len(t)))
-	return (1 - float64(LevDistance(s, t, opts))/maxLen) * 100
+func LevRatio(first, second string, opts *LevOptions) float64 {
+	maxLen := float64(math.Max(len(first), len(second)))
+	return (1 - float64(LevDistance(first, second, opts))/maxLen) * 100
 }
