@@ -65,6 +65,10 @@ func LevDistance(first, second string, opts *LevOptions) int {
 }
 
 func LevRatio(first, second string, opts *LevOptions) float64 {
+	if first == "" || second == "" {
+		return 100
+	}
+
 	maxLen := float64(math.Max(len(first), len(second)))
 	return (1 - float64(LevDistance(first, second, opts))/maxLen) * 100
 }
